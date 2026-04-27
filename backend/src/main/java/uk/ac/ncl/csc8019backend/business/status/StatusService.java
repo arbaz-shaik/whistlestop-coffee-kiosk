@@ -3,9 +3,9 @@ package uk.ac.ncl.csc8019backend.business.status;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import uk.ac.ncl.csc8019backend.buisness.order.Order;
-import uk.ac.ncl.csc8019backend.buisness.order.OrderRepository;
-import uk.ac.ncl.csc8019backend.buisness.common.OrderStatus;
+import uk.ac.ncl.csc8019backend.business.order.Order;
+import uk.ac.ncl.csc8019backend.business.order.OrderRepository;
+import uk.ac.ncl.csc8019backend.business.common.OrderStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
