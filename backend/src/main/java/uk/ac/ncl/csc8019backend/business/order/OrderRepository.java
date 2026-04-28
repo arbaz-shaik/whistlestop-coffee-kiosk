@@ -1,11 +1,5 @@
 package uk.ac.ncl.csc8019backend.business.order;
 
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import uk.ac.ncl.csc8019backend.business.common.OrderStatus;
 
 /**
@@ -20,13 +14,7 @@ public interface OrderRepository extends JpaRepository<Order,Long>{
     long countByStatus(OrderStatus  status);
 
     // For StaffService : to get orders by status (Active orders)
-    List<Order> findByStatusAndArchivedFalseOrderByPickupTimeAsc(OrderStatus status);
-
-    // For StaffServices: to get archived orders
-    List<Order> findByArchivedTrueOrderByUpdatedAtDesc();
-
-    //for StaffService: get all active orders (non archived)
-    List<Order> findByArchivedFalseOrderByPickupTimeAsc();
+ main
 
     //for AutoCancellationTaskt
     List<Order> findByStatusAndPickupTimeBefore(OrderStatus status, LocalDateTime cutoff);
