@@ -5,7 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import uk.ac.ncl.csc8019backend.business.order.Order;
 import uk.ac.ncl.csc8019backend.business.order.OrderRepository;
+
 import uk.ac.ncl.csc8019backend.business.common.OrderStatus;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,98 +25,107 @@ import java.util.List;
  */
 
 @Service
-
 public class StatusService{
 
-}
-
-    
-=======
-import uk.ac.ncl.csc8019backend.business.common.OrderStatus;
-
-/**
- * Service layer for managing order status transitions and lifecycle.
- * Handles status updates, validation, and auto-cancellation.
- * 
- * @author Shaik Arbaz
- */
-@Service
-public class StatusService {
-
+    private final OrderRepository orderRepository;
+    private final ApplicationEventPublisher eventPublisher;
     /**
-     * Updates the status of an order after validating the transition.
+     * Contstructor with Dependency Injection
+     * OrderRepository instance is provided by the Springboot
      * 
-     * @param orderId the ID of the order to update
-     * @param newStatus the new status to set
-     * @throws IllegalArgumentException if the status transition is invalid
+     * @param orderRepository is Repository used for database Operations 
      */
+
+    public StatusService(OrderRepository orderRepository, ApplicationEventPublisher eventPublisher){
+        this.orderRepository = orderRepository;
+        this.eventPublisher = eventPublisher;
+
+    }
+
     @Transactional
-    public void updateOrderStatus(Long orderId, OrderStatus newStatus) {
-        // TODO: Implement in next phase when Order entity exists
-        // Implementation will include:
-        // 1. Fetch order from repository
-        // 2. Validate transition using canTransition()
-        // 3. Update order.status and order.updatedAt
-        // 4. Save to database
+    public Order updateOrderStatus(Long orderId, OrderStatus newStatus){
+        // Fetch the order
+        Order order = orderRepository.findById(orderId)
+        .orElseThrow(()-> new IllegalArgumentException(
+            "Order not found with Id :" + orderId
+        ));
+        OrderStatus oldStatus = order.getStatus();
+
+        // Validate transition
+        if (!canTransition(order.getStatus(),newStatus)){
+            throw new IllegalStateException(
+                String.format("Invalid status Transition : from %s to %s is not allowed for order%d", order.getStatus(), newStatus, orderId)
+            );
+
+        }
+
+        order.setStatus(newStatus);
+        order.setUpdatedAt(LocalDateTime.now());
+
+        // Save and return
+
+        Order updatedOrder = orderRepository.save(order);
+
+        OrderStatusChangedEvent event = new OrderStatusChangedEvent(orderId, oldStatus, newStatus);
+        eventPublisher.publishEvent(event);
+        return updatedOrder;
+
     }
 
     /**
-     * Validates whether a status transition is allowed.
+     * Validate whether a status tansiton is allowed 
      * 
-     * Valid transitions:
-     * - PENDING → ACCEPTED or CANCELLED
-     * - ACCEPTED → IN_PROGRESS or CANCELLED
-     * - IN_PROGRESS → READY or CANCELLED
-     * - READY → COLLECTED or CANCELLED
-     * - COLLECTED → (no transitions allowed - terminal state)
-     * - CANCELLED → (no transitions allowed - terminal state)
+     * state  machine rules:
+     * - PENDING -> ACCEPTED OR CANCELLED
+     * -ACCEPTED -> IN_PROGRESS OR CANCELLED
+     * -READY -> COLLECTED OR CANCELLED
+     * Terminal state cannot transition
      * 
-     * @param current the current status
-     * @param next the desired next status
+     * @param current : current state
+     * @param next : desired next state
      * @return true if transition is valid, false otherwise
+    
      */
-    public boolean canTransition(OrderStatus current, OrderStatus next) {
-        // Terminal states cannot transition
-        if (current == OrderStatus.COLLECTED || current == OrderStatus.CANCELLED) {
-            return false;
-        }
 
-        // Can always cancel (unless already in terminal state)
-        if (next == OrderStatus.CANCELLED) {
+    public boolean canTransition(OrderStatus current, OrderStatus next){
+        // Terminal states cannot transition
+        if (current == OrderStatus.CANCELLED || current == OrderStatus.COLLECTED){
+ 
+        return false;
+        }
+        //can cancel from any non-terminal state
+
+        if (next == OrderStatus.CANCELLED){
             return true;
         }
 
-        // Valid forward transitions
-        return switch (current) {
+        // Valid forwar Transitions
+
+        return switch(current){
             case PENDING -> next == OrderStatus.ACCEPTED;
             case ACCEPTED -> next == OrderStatus.IN_PROGRESS;
-            case IN_PROGRESS -> next == OrderStatus.READY;
-            case READY -> next == OrderStatus.COLLECTED;
+            case IN_PROGRESS-> next == OrderStatus.READY;
+            case  READY -> next == OrderStatus.COLLECTED;
             default -> false;
+
+
         };
+
+       
+
+
     }
 
-    /**
-     * Cancels an order by setting status to CANCELLED.
-     * 
-     * @param orderId the ID of the order to cancel
-     */
+     /**
+         * Cancels and order by setting status to CANCLLED
+         * 
+         * @param orderId the ID of the order to cancel
+         * @return the cancelled Order entity
+         */
+
     @Transactional
-    public void cancelOrder(Long orderId) {
-        // TODO: Implement when Order entity exists
-        updateOrderStatus(orderId, OrderStatus.CANCELLED);
+    public Order cancelOrder(Long orderId){
+        return updateOrderStatus(orderId,OrderStatus.CANCELLED);
     }
 
-    /**
-     * Scheduled task to auto-cancel orders not collected 15 minutes after pickup time.
-     * This method should be triggered by a scheduler (e.g., @Scheduled annotation).
-     * 
-     * TODO: Add @Scheduled annotation when ready to activate
-     */
-    public void checkOverdueOrders() {
-        // TODO: Implement auto-cancellation logic
-        // 1. Find orders with status=READY and pickupTime + 15min < now
-        // 2. For each, call cancelOrder()
-    }
-}
 
