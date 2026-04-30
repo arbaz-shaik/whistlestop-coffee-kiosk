@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Kiosk Staff Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            /* Color Palette - Soft & Professional */
+            --bg-primary: #F8FAFC;
+            --bg-secondary: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --text-muted: #94A3B8;
+            --border-light: #E2E8F0;
+            --border-subtle: #F1F5F9;
+            
+            /* Primary Blue */
+            --primary-50: #EFF6FF;
+            --primary-100: #DBEAFE;
+            --primary-500: #3B82F6;
+            --primary-600: #2563EB;
+            --primary-700: #1D4ED8;
+            
+            /* Status Colors - Soft */
+            --status-accepted: #FEF3C7;
+            --status-accepted-text: #D97706;
+            --status-preparing: #DBEAFE;
+            --status-preparing-text: #2563EB;
+            --status-ready: #D1FAE5;
+            --status-ready-text: #059669;
+            --status-collected: #F3F4F6;
+            --status-collected-text: #6B7280;
+            --status-cancelled: #FEE2E2;
+            --status-cancelled-text: #DC2626;
+            --status-warning: #FEF3C7;
+            --status-warning-text: #EA580C;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+            
+            /* Spacing */
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 0.75rem;
+            --space-4: 1rem;
+            --space-5: 1.25rem;
+            --space-6: 1.5rem;
+            --space-8: 2rem;
+            --space-10: 2.5rem;
+            --space-12: 3rem;
+            
+            /* Border Radius */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .toast {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-4) var(--space-6);
+            box-shadow: var(--shadow-lg);
+            border-left: 4px solid var(--primary-500);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+            min-width: 300px;
+            animation: slideIn 0.3s ease;
+            cursor: pointer;
+        }
+
+        .toast.success {
+            border-left-color: var(--status-ready-text);
+        }
+
+        .toast.error {
+            border-left-color: var(--status-cancelled-text);
+        }
+
+        .toast.warning {
+            border-left-color: var(--status-accepted-text);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+
+        .toast.hiding {
+            animation: slideOut 0.3s ease forwards;
+        }
+
+        .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        .toast.success .toast-icon {
+            background: var(--status-ready);
+            color: var(--status-ready-text);
+        }
+
+        .toast.error .toast-icon {
+            background: var(--status-cancelled);
+            color: var(--status-cancelled-text);
+        }
+
+        .toast.warning .toast-icon {
+            background: var(--status-accepted);
+            color: var(--status-accepted-text);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        /* Layout Container */
+        .dashboard-container {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: var(--space-8);
+        }
+
+        /* Header Section */
+        .header {
+            text-align: center;
+            margin-bottom: var(--space-10);
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+            letter-spacing: -0.02em;
+        }
+
+        .header-subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+            font-weight: 400;
+        }
+
+        /* Summary Cards Grid */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: var(--space-5);
+            margin-bottom: var(--space-8);
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: var(--space-6);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-subtle);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .summary-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .summary-card:active {
+            transform: translateY(0);
+        }
+
+        .summary-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: var(--space-4);
+        }
+
+        .summary-card-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .summary-card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .summary-card-icon.blue {
+            background: var(--primary-50);
+            color: var(--primary-600);
+        }
+
+        .summary-card-icon.green {
+            background: var(--status-ready);
+            color: var(--status-ready-text);
+        }
+
+        .summary-card-icon.gray {
+            background: var(--status-collected);
+            color: var(--status-collected-text);
+        }
+
+        .summary-card-icon.red {
+            background: var(--status-cancelled);
+            color: var(--status-cancelled-text);
+        }
+
+        .summary-card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--space-1);
+        }
+
+        .summary-card-trend {
+            font-size: 13px;
+            color: var(--text-muted);
+        }
+
+        /* Main Content Card */
+        .main-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-subtle);
+            overflow: hidden;
+        }
+
+        /* Card Header */
+        .card-header {
+            padding: var(--space-6) var(--space-8);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: var(--space-4);
+        }
+
+        .card-header-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: var(--space-1);
+            background: var(--bg-secondary);
+            padding: var(--space-1);
+            border-radius: var(--radius-md);
+        }
+
+        .filter-tab {
+            padding: var(--space-2) var(--space-4);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .filter-tab:hover {
+            color: var(--text-primary);
+        }
+
+        .filter-tab.active {
+            background: var(--bg-card);
+            color: var(--primary-600);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Search and Actions Bar */
+        .toolbar {
+            padding: var(--space-5) var(--space-8);
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            max-width: 320px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: var(--space-3) var(--space-4) var(--space-3) var(--space-10);
+            font-size: 14px;
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.15s ease;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-500);
+            box-shadow: 0 0 0 3px var(--primary-100);
+        }
+
+        .search-box input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: var(--space-4);
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .toolbar-actions {
+            display: flex;
+            gap: var(--space-3);
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-3) var(--space-5);
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            border: none;
+            white-space: nowrap;
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--primary-600);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-700);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-light);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .btn-icon {
+            width: 36px;
+            height: 36px;
+            padding: 0;
+            justify-content: center;
+        }
+
+        /* Table Styles */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .orders-table thead {
+            background: var(--bg-secondary);
+        }
+
+        .orders-table th {
+            padding: var(--space-4) var(--space-6);
+            text-align: left;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+        }
+
+        .orders-table th:first-child {
+            padding-left: var(--space-8);
+        }
+
+        .orders-table th:last-child {
+            padding-right: var(--space-8);
+        }
+
+        .orders-table tbody tr {
+            border-bottom: 1px solid var(--border-subtle);
+            transition: all 0.2s ease;
+        }
+
+        .orders-table tbody tr:hover {
+            background: var(--bg-primary);
+        }
+
+        .orders-table tbody tr.row-updating {
+            animation: rowPulse 0.5s ease;
+        }
+
+        @keyframes rowPulse {
+            0%, 100% { background: transparent; }
+            50% { background: var(--primary-50); }
+        }
+
+        .orders-table tbody tr:last-child {
+            border-bottom: none;
+        }
+
+        .orders-table td {
+            padding: var(--space-5) var(--space-6);
+            vertical-align: middle;
+        }
+
+        .orders-table td:first-child {
+            padding-left: var(--space-8);
+        }
+
+        .orders-table td:last-child {
+            padding-right: var(--space-8);
+        }
+
+        .orders-table tr.hidden {
+            display: none;
+        }
+
+        /* Order ID */
+        .order-id {
+            font-weight: 600;
+            color: var(--primary-600);
+            font-family: 'SF Mono', Monaco, monospace;
+            font-size: 13px;
+        }
+
+        /* Customer Info */
+        .customer-info {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+
+        .customer-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .customer-phone {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* Items List */
+        .items-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+        }
+
+        .item-row {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .item-name {
+            color: var(--text-primary);
+        }
+
+        .item-qty {
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg-secondary);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-sm);
+            min-width: 24px;
+            text-align: center;
+        }
+
+        /* Pickup Time */
+        .pickup-time {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-1);
+        }
+
+        .time-value {
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+
+        .time-warning {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: 11px;
+            color: var(--status-warning-text);
+            background: var(--status-warning);
+            padding: var(--space-1) var(--space-2);
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+        }
+
+        /* Status Badges */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) var(--space-3);
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: var(--radius-md);
+            white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+
+        .status-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+
+        .status-accepted {
+            background: var(--status-accepted);
+            color: var(--status-accepted-text);
+        }
+
+        .status-accepted::before {
+            background: var(--status-accepted-text);
+        }
+
+        .status-preparing {
+            background: var(--status-preparing);
+            color: var(--status-preparing-text);
+        }
+
+        .status-preparing::before {
+            background: var(--status-preparing-text);
+        }
+
+        .status-ready {
+            background: var(--status-ready);
+            color: var(--status-ready-text);
+        }
+
+        .status-ready::before {
+            background: var(--status-ready-text);
+        }
+
+        .status-collected {
+            background: var(--status-collected);
+            color: var(--status-collected-text);
+        }
+
+        .status-collected::before {
+            background: var(--status-collected-text);
+        }
+
+        .status-cancelled {
+            background: var(--status-cancelled);
+            color: var(--status-cancelled-text);
+        }
+
+        .status-cancelled::before {
+            background: var(--status-cancelled-text);
+        }
+
+        /* Cancellation Reason Tag */
+        .cancel-reason {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-1);
+            font-size: 11px;
+            color: var(--status-cancelled-text);
+            margin-top: var(--space-1);
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .action-btn {
+            padding: var(--space-2) var(--space-3);
+            font-size: 12px;
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            border: none;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .action-btn-prepare {
+            background: var(--status-preparing);
+            color: var(--status-preparing-text);
+        }
+
+        .action-btn-prepare:hover:not(:disabled) {
+            background: var(--primary-500);
+            color: white;
+        }
+
+        .action-btn-ready {
+            background: var(--status-ready);
+            color: var(--status-ready-text);
+        }
+
+        .action-btn-ready:hover:not(:disabled) {
+            background: var(--status-ready-text);
+            color: white;
+        }
+
+        .action-btn-collect {
+            background: var(--bg-secondary);
+            color: var(--text-secondary);
+        }
+
+        .action-btn-collect:hover:not(:disabled) {
+            background: var(--status-collected-text);
+            color: white;
+        }
+
+        .action-btn-cancel {
+            background: var(--status-cancelled);
+            color: var(--status-cancelled-text);
+        }
+
+        .action-btn-cancel:hover:not(:disabled) {
+            background: var(--status-cancelled-text);
+            color: white;
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--space-5) var(--space-8);
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .pagination-info {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .pagination-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border-light);
+            background: var(--bg-card);
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-size: 14px;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-btn.active {
+            background: var(--primary-600);
+            color: white;
+            border-color: var(--primary-600);
+        }
+
+        /* Empty State */
+        .empty-state {
+            padding: var(--space-12);
+            text-align: center;
+        }
+
+        .empty-state-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--bg-secondary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto var(--space-5);
+            font-size: 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--space-2);
+        }
+
+        .empty-state-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            max-width: 400px;
+            width: 90%;
+            box-shadow: var(--shadow-lg);
+            transform: scale(0.9);
+            transition: all 0.2s ease;
+        }
+
+        .modal-overlay.active .modal {
+            transform: scale(1);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: var(--space-4);
+        }
+
+        .modal-text {
+            color: var(--text-secondary);
+            margin-bottom: var(--space-6);
+            line-height: 1.6;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: var(--space-3);
+            justify-content: flex-end;
+        }
+
+        /* Archive View */
+        .archive-view {
+            display: none;
+        }
+
+        .archive-view.active {
+            display: block;
+        }
+
+        .orders-view.hidden {
+            display: none;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 1200px) {
+            .summary-cards {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-container {
+                padding: var(--space-4);
+            }
+
+            .summary-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-box {
+                max-width: none;
+            }
+
+            .orders-table {
+                font-size: 13px;
+            }
+
+            .orders-table th,
+            .orders-table td {
+                padding: var(--space-3) var(--space-4);
+            }
+
+            .action-buttons {
+                flex-wrap: wrap;
+            }
+        }
+
+        /* Animation for new orders */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .new-order {
+            animation: pulse 2s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Cancel Modal -->
+    <div class="modal-overlay" id="cancelModal">
+        <div class="modal">
+            <h3 class="modal-title">Cancel Order</h3>
+            <p class="modal-text">Are you sure you want to cancel this order? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="closeModal()">No, Keep Order</button>
+                <button class="btn btn-primary" onclick="confirmCancel()" style="background: var(--status-cancelled-text);">Yes, Cancel Order</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="header">
+            <h1 class="header-title">Coffee Kiosk Staff Dashboard</h1>
+            <p class="header-subtitle">Manage orders efficiently and keep customers happy</p>
+        </header>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card" onclick="filterByStatus('all')">
+                <div class="summary-card-header">
+                    <span class="summary-card-label">Active Orders</span>
+                    <div class="summary-card-icon blue">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+                <div class="summary-card-value" id="activeCount">12</div>
+                <div class="summary-card-trend">3 new since last hour</div>
+            </div>
+
+            <div class="summary-card" onclick="filterByStatus('ready')">
+                <div class="summary-card-header">
+                    <span class="summary-card-label">Ready for Collection</span>
+                    <div class="summary-card-icon green">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+                <div class="summary-card-value" id="readyCount">5</div>
+                <div class="summary-card-trend">Waiting for pickup</div>
+            </div>
+
+            <div class="summary-card" onclick="showArchive()">
+                <div class="summary-card-header">
+                    <span class="summary-card-label">Collected Today</span>
+                    <div class="summary-card-icon gray">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                </div>
+                <div class="summary-card-value" id="collectedCount">47</div>
+                <div class="summary-card-trend">+12% from yesterday</div>
+            </div>
+
+            <div class="summary-card" onclick="filterByStatus('cancelled')">
+                <div class="summary-card-header">
+                    <span class="summary-card-label">Cancelled Orders</span>
+                    <div class="summary-card-icon red">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                </div>
+                <div class="summary-card-value" id="cancelledCount">2</div>
+                <div class="summary-card-trend">1 no-show, 1 out of stock</div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="main-card">
+            <!-- Card Header -->
+            <div class="card-header">
+                <h2 class="card-header-title" id="viewTitle">Order Management</h2>
+                <div class="filter-tabs" id="filterTabs">
+                    <button class="filter-tab active" data-filter="all" onclick="filterByStatus('all')">All</button>
+                    <button class="filter-tab" data-filter="accepted" onclick="filterByStatus('accepted')">Accepted</button>
+                    <button class="filter-tab" data-filter="preparing" onclick="filterByStatus('preparing')">Preparing</button>
+                    <button class="filter-tab" data-filter="ready" onclick="filterByStatus('ready')">Ready</button>
+                    <button class="filter-tab" data-filter="collected" onclick="filterByStatus('collected')">Collected</button>
+                    <button class="filter-tab" data-filter="cancelled" onclick="filterByStatus('cancelled')">Cancelled</button>
+                </div>
+            </div>
+
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="searchInput" placeholder="Search by order ID or customer name..." onkeyup="searchOrders()">
+                </div>
+                <div class="toolbar-actions">
+                    <button class="btn btn-secondary" onclick="toggleFilter()">
+                        <i class="fas fa-filter"></i>
+                        Filter
+                    </button>
+                    <button class="btn btn-primary" id="archiveBtn" onclick="toggleArchive()">
+                        <i class="fas fa-archive"></i>
+                        <span id="archiveBtnText">View Archive</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Active Orders View -->
+            <div class="orders-view" id="ordersView">
+                <div class="table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Pickup Time</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTableBody">
+                            <!-- Orders will be inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination">
+                    <div class="pagination-info" id="paginationInfo">
+                        Showing 1-8 of 64 orders
+                    </div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" onclick="changePage(-1)" id="prevBtn">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="pagination-btn active" onclick="goToPage(1)">1</button>
+                        <button class="pagination-btn" onclick="goToPage(2)">2</button>
+                        <button class="pagination-btn" onclick="goToPage(3)">3</button>
+                        <span style="color: var(--text-muted); padding: 0 var(--space-2);">...</span>
+                        <button class="pagination-btn" onclick="goToPage(8)">8</button>
+                        <button class="pagination-btn" onclick="changePage(1)" id="nextBtn">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Archive View -->
+            <div class="archive-view" id="archiveView">
+                <div class="table-container">
+                    <table class="orders-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>Customer</th>
+                                <th>Items</th>
+                                <th>Completed Time</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archiveTableBody">
+                            <!-- Archive orders will be inserted here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <div class="pagination-info">Showing archived orders</div>
+                    <div class="pagination-controls">
+                        <button class="pagination-btn" onclick="changeArchivePage(-1)">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="pagination-btn active">1</button>
+                        <button class="pagination-btn" onclick="changeArchivePage(1)">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Order Data
+        let orders = [
+            {
+                id: '#ORD-2026-001',
+                customer: 'Sarah Johnson',
+                phone: '+1 555-0123',
+                items: [
+                    { name: 'Caramel Latte', qty: 2 },
+                    { name: 'Blueberry Muffin', qty: 1 }
+                ],
+                pickupTime: '10:30 AM',
+                status: 'preparing',
+                isNew: false,
+                isOverdue: false
+            },
+            {
+                id: '#ORD-2026-002',
+                customer: 'Michael Chen',
+                phone: '+1 555-0124',
+                items: [
+                    { name: 'Americano', qty: 1 },
+                    { name: 'Chocolate Croissant', qty: 2 }
+                ],
+                pickupTime: '10:45 AM',
+                status: 'accepted',
+                isNew: true,
+                isOverdue: false
+            },
+            {
+                id: '#ORD-2026-003',
+                customer: 'Emily Davis',
+                phone: '+1 555-0125',
+                items: [
+                    { name: 'Mocha', qty: 1 }
+                ],
+                pickupTime: '10:15 AM',
+                status: 'ready',
+                isNew: false,
+                isOverdue: true
+            },
+            {
+                id: '#ORD-2026-004',
+                customer: 'James Wilson',
+                phone: '+1 555-0126',
+                items: [
+                    { name: 'Cappuccino', qty: 2 },
+                    { name: 'Hot Chocolate', qty: 1 }
+                ],
+                pickupTime: '10:50 AM',
+                status: 'ready',
+                isNew: false,
+                isOverdue: false
+            },
+            {
+                id: '#ORD-2026-005',
+                customer: 'Anna Martinez',
+                phone: '+1 555-0127',
+                items: [
+                    { name: 'Vanilla Latte', qty: 1 },
+                    { name: 'Cinnamon Roll', qty: 1 }
+                ],
+                pickupTime: '11:00 AM',
+                status: 'preparing',
+                isNew: false,
+                isOverdue: false
+            },
+            {
+                id: '#ORD-2026-006',
+                customer: 'David Brown',
+                phone: '+1 555-0128',
+                items: [
+                    { name: 'Espresso', qty: 2 }
+                ],
+                pickupTime: '11:15 AM',
+                status: 'accepted',
+                isNew: false,
+                isOverdue: false
+            },
+            {
+                id: '#ORD-2026-007',
+                customer: 'Lisa Anderson',
+                phone: '+1 555-0129',
+                items: [
+                    { name: 'Flat White', qty: 1 }
+                ],
+                pickupTime: '9:30 AM',
+                status: 'cancelled',
+                isNew: false,
+                isOverdue: false,
+                cancelReason: 'No-show (15+ min)'
+            },
+            {
+                id: '#ORD-2026-008',
+                customer: 'Robert Taylor',
+                phone: '+1 555-0130',
+                items: [
+                    { name: 'Matcha Latte', qty: 1 }
+                ],
+                pickupTime: '10:00 AM',
+                status: 'cancelled',
+                isNew: false,
+                isOverdue: false,
+                cancelReason: 'Out of stock'
+            }
+        ];
+
+        let archivedOrders = [
+            {
+                id: '#ORD-2026-000',
+                customer: 'John Smith',
+                phone: '+1 555-0100',
+                items: [
+                    { name: 'Latte', qty: 1 },
+                    { name: 'Croissant', qty: 1 }
+                ],
+                completedTime: '9:45 AM',
+                status: 'collected'
+            },
+            {
+                id: '#ORD-2026-009',
+                customer: 'Mary Johnson',
+                phone: '+1 555-0131',
+                items: [
+                    { name: 'Americano', qty: 2 }
+                ],
+                completedTime: '9:30 AM',
+                status: 'collected'
+            }
+        ];
+
+        let currentFilter = 'all';
+        let currentPage = 1;
+        let cancelOrderId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            renderOrders();
+            renderArchive();
+            updateSummaryCards();
+        });
+
+        // Render Orders Table
+        function renderOrders() {
+            const tbody = document.getElementById('ordersTableBody');
+            let filteredOrders = orders;
+
+            if (currentFilter !== 'all') {
+                filteredOrders = orders.filter(order => order.status === currentFilter);
+            }
+
+            // Search filter
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            if (searchTerm) {
+                filteredOrders = filteredOrders.filter(order => 
+                    order.id.toLowerCase().includes(searchTerm) ||
+                    order.customer.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            tbody.innerHTML = filteredOrders.map(order => `
+                <tr class="${order.isNew ? 'new-order' : ''}" data-order-id="${order.id}">
+                    <td><span class="order-id">${order.id}</span></td>
+                    <td>
+                        <div class="customer-info">
+                            <span class="customer-name">${order.customer}</span>
+                            <span class="customer-phone">${order.phone}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="items-list">
+                            ${order.items.map(item => `
+                                <div class="item-row">
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-qty">×${item.qty}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="pickup-time">
+                            <span class="time-value">${order.pickupTime}</span>
+                            ${order.isOverdue ? `
+                                <span class="time-warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Overdue
+                                </span>
+                            ` : ''}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${order.status}">
+                            ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                        ${order.cancelReason ? `
+                            <div class="cancel-reason">
+                                <i class="fas fa-${order.cancelReason.includes('No-show') ? 'user-clock' : 'box-open'}"></i>
+                                ${order.cancelReason}
+                            </div>
+                        ` : ''}
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            ${getActionButtons(order)}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+
+            updatePaginationInfo(filteredOrders.length);
+        }
+
+        // Get Action Buttons based on status
+        function getActionButtons(order) {
+            if (order.status === 'cancelled' || order.status === 'collected') {
+                return `<button class="action-btn action-btn-cancel" disabled>Completed</button>`;
+            }
+
+            let buttons = '';
+            
+            if (order.status === 'accepted') {
+                buttons += `<button class="action-btn action-btn-prepare" onclick="updateStatus('${order.id}', 'preparing')">Start Preparing</button>`;
+            } else if (order.status === 'preparing') {
+                buttons += `<button class="action-btn action-btn-ready" onclick="updateStatus('${order.id}', 'ready')">Mark Ready</button>`;
+            } else if (order.status === 'ready') {
+                buttons += `<button class="action-btn action-btn-collect" onclick="updateStatus('${order.id}', 'collected')">Mark Collected</button>`;
+            }
+
+            if (order.status !== 'collected' && order.status !== 'cancelled') {
+                buttons += `<button class="action-btn action-btn-cancel" onclick="showCancelModal('${order.id}')">Cancel</button>`;
+            }
+
+            return buttons;
+        }
+
+        // Update Order Status
+        function updateStatus(orderId, newStatus) {
+            const order = orders.find(o => o.id === orderId);
+            if (order) {
+                const oldStatus = order.status;
+                order.status = newStatus;
+                order.isNew = false;
+
+                // If collected, move to archive after delay
+                if (newStatus === 'collected') {
+                    setTimeout(() => {
+                        archivedOrders.unshift({
+                            ...order,
+                            completedTime: new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+                        });
+                        orders = orders.filter(o => o.id !== orderId);
+                        renderOrders();
+                        renderArchive();
+                        updateSummaryCards();
+                    }, 1000);
+                }
+
+                renderOrders();
+                updateSummaryCards();
+
+                // Show toast notification
+                const statusMessages = {
+                    'preparing': 'Order is now being prepared',
+                    'ready': 'Order is ready for collection',
+                    'collected': 'Order marked as collected'
+                };
+
+                showToast('success', 'Status Updated', statusMessages[newStatus] || `Order status changed to ${newStatus}`);
+
+                // Add row animation
+                const row = document.querySelector(`tr[data-order-id="${orderId}"]`);
+                if (row) {
+                    row.classList.add('row-updating');
+                    setTimeout(() => row.classList.remove('row-updating'), 500);
+                }
+            }
+        }
+
+        // Show Cancel Modal
+        function showCancelModal(orderId) {
+            cancelOrderId = orderId;
+            document.getElementById('cancelModal').classList.add('active');
+        }
+
+        // Close Modal
+        function closeModal() {
+            document.getElementById('cancelModal').classList.remove('active');
+            cancelOrderId = null;
+        }
+
+        // Confirm Cancel
+        function confirmCancel() {
+            if (cancelOrderId) {
+                const order = orders.find(o => o.id === cancelOrderId);
+                if (order) {
+                    order.status = 'cancelled';
+                    order.cancelReason = 'Cancelled by staff';
+                    renderOrders();
+                    updateSummaryCards();
+                    showToast('error', 'Order Cancelled', `${order.id} has been cancelled`);
+                }
+            }
+            closeModal();
+        }
+
+        // Filter by Status
+        function filterByStatus(status) {
+            currentFilter = status;
+            currentPage = 1;
+
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+                if (tab.dataset.filter === status) {
+                    tab.classList.add('active');
+                }
+            });
+
+            // Hide archive view if open
+            document.getElementById('archiveView').classList.remove('active');
+            document.getElementById('ordersView').classList.remove('hidden');
+            document.getElementById('archiveBtnText').textContent = 'View Archive';
+
+            renderOrders();
+        }
+
+        // Toggle Archive View
+        function toggleArchive() {
+            const archiveView = document.getElementById('archiveView');
+            const ordersView = document.getElementById('ordersView');
+            const btnText = document.getElementById('archiveBtnText');
+
+            if (archiveView.classList.contains('active')) {
+                archiveView.classList.remove('active');
+                ordersView.classList.remove('hidden');
+                btnText.textContent = 'View Archive';
+                document.getElementById('viewTitle').textContent = 'Order Management';
+            } else {
+                showArchive();
+            }
+        }
+
+        function showArchive() {
+            document.getElementById('archiveView').classList.add('active');
+            document.getElementById('ordersView').classList.add('hidden');
+            document.getElementById('archiveBtnText').textContent = 'Back to Orders';
+            document.getElementById('viewTitle').textContent = 'Order Archive';
+
+            // Reset filter tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+        }
+
+        // Render Archive
+        function renderArchive() {
+            const tbody = document.getElementById('archiveTableBody');
+            tbody.innerHTML = archivedOrders.map(order => `
+                <tr>
+                    <td><span class="order-id">${order.id}</span></td>
+                    <td>
+                        <div class="customer-info">
+                            <span class="customer-name">${order.customer}</span>
+                            <span class="customer-phone">${order.phone}</span>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="items-list">
+                            ${order.items.map(item => `
+                                <div class="item-row">
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-qty">×${item.qty}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </td>
+                    <td>
+                        <span class="time-value">${order.completedTime}</span>
+                    </td>
+                    <td>
+                        <span class="status-badge status-${order.status}">
+                            ${order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                    </td>
+                    <td>
+                        <button class="action-btn action-btn-collect" disabled>Completed</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Search Orders
+        function searchOrders() {
+            renderOrders();
+        }
+
+        // Toggle Filter (placeholder for advanced filters)
+        function toggleFilter() {
+            showToast('warning', 'Coming Soon', 'Advanced filtering options will be available soon!');
+        }
+
+        // Update Summary Cards
+        function updateSummaryCards() {
+            const active = orders.filter(o => o.status !== 'collected' && o.status !== 'cancelled').length;
+            const ready = orders.filter(o => o.status === 'ready').length;
+            const collected = archivedOrders.filter(o => o.status === 'collected').length;
+            const cancelled = orders.filter(o => o.status === 'cancelled').length;
+
+            document.getElementById('activeCount').textContent = active;
+            document.getElementById('readyCount').textContent = ready;
+            document.getElementById('collectedCount').textContent = collected;
+            document.getElementById('cancelledCount').textContent = cancelled;
+        }
+
+        // Show Toast Notification
+        function showToast(type, title, message) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            const iconMap = {
+                'success': 'check-circle',
+                'error': 'times-circle',
+                'warning': 'exclamation-circle'
+            };
+
+            toast.innerHTML = `
+                <div class="toast-icon">
+                    <i class="fas fa-${iconMap[type]}"></i>
+                </div>
+                <div class="toast-content">
+                    <div class="toast-title">${title}</div>
+                    <div class="toast-message">${message}</div>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            // Auto remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+
+            // Click to dismiss
+            toast.addEventListener('click', () => {
+                toast.classList.add('hiding');
+                setTimeout(() => toast.remove(), 300);
+            });
+        }
+
+        // Pagination
+        function updatePaginationInfo(totalItems) {
+            const start = (currentPage - 1) * 8 + 1;
+            const end = Math.min(currentPage * 8, totalItems);
+            document.getElementById('paginationInfo').textContent = 
+                `Showing ${start}-${end} of ${totalItems} orders`;
+        }
+
+        function changePage(direction) {
+            currentPage += direction;
+            if (currentPage < 1) currentPage = 1;
+            renderOrders();
+        }
+
+        function goToPage(page) {
+            currentPage = page;
+            renderOrders();
+        }
+
+        function changeArchivePage(direction) {
+            showToast('warning', 'Pagination', 'Archive pagination coming soon!');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('cancelModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
