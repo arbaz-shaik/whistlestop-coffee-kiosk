@@ -11,21 +11,11 @@ import uk.ac.ncl.csc8019backend.business.common.OrderStatus;
 import uk.ac.ncl.csc8019backend.business.order.Order;
 import uk.ac.ncl.csc8019backend.business.order.OrderRepository;
 
-/**
- *  Staff dasboard operations servics.
- * Offers read-only quesries for statistics and ative/archived orders
- * 
- * @author Shaik Arbaz
- */
-
 
 
 @Service
 public class StaffService{
 
-/**
- * @param orderRepository Repository for database operations
- */
 
     private final OrderRepository orderRepository;
 
@@ -38,27 +28,15 @@ public class StaffService{
        
     }
 
-    /** 
-     *  Returns list of non-Archived order srted by pick up time
-    */
-
     public List<Order> getAllActiveOrders(){
        return orderRepository.findByArchivedFalseOrderByPickupTimeAsc();
 
     }
 
-    /**
-     * List of  orders are returned arranged by pickup time and filted by status
-     */
-
     public List<Order> getOrdersByStatus(OrderStatus status){
         return orderRepository.findByStatusAndArchivedFalseOrderByPickupTimeAsc(status);
 
     }
-
-    /**
-     * Retrives a single order by its ID or raise an exception if not found
-     */
 
     public Order getOrderById(Long orderId){
 
@@ -69,10 +47,6 @@ public class StaffService{
 
 
     }
-
-    /**
-     * Archives an order. Only if COLLECTED or CANCELLED orders can be archived
-     */
 
     public Order archiveOrder(Long orderId){
         Order order = getOrderById(orderId);
@@ -90,18 +64,9 @@ public class StaffService{
 
     }
 
-    /**
-     * returns List of all Archived orders
-     */
-
     public List<Order> getArchivedOrders(){
         return orderRepository.findByArchivedTrueOrderByUpdatedAtDesc();
         }
-
-    /**
-     * Returns a count of orders grouped by each status
-     * 
-     */
 
     public Map<OrderStatus, Long> getOrderStatistics(){
 
