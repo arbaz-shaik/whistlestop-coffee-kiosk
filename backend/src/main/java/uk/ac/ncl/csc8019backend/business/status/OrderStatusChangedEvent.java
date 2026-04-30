@@ -1,7 +1,8 @@
 package uk.ac.ncl.csc8019backend.business.status;
 
-import uk.ac.ncl.csc8019backend.business.common.OrderStatus;
 import java.time.LocalDateTime;
+
+import uk.ac.ncl.csc8019backend.business.common.OrderStatus;
 
 /**
  * whenever the order status is changed an event is published
@@ -17,9 +18,8 @@ public class OrderStatusChangedEvent{
     private final Long orderId;
     private final OrderStatus oldStatus;
     private final OrderStatus newStatus;
-
+  
     public OrderStatusChangedEvent(Long orderId, OrderStatus oldStatus, OrderStatus newStatus){
-
         this.orderId = orderId;
         this.oldStatus = oldStatus;
         this.newStatus = newStatus;
