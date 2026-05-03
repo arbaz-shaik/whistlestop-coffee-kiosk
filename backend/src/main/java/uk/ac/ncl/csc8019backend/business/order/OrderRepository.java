@@ -1,27 +1,33 @@
 package uk.ac.ncl.csc8019backend.business.order;
 
+import java.util.List;
 
-import uk.ac.ncl.csc8019backend.business.common.OrderStatus;
-
-import org.spring.framework.data.jpa.repository;
-
+import org.springframework.data.jpa.repository.JpaRepository;
 
 
-/**
- * Database access layer for Order entity
- * the spring has readymade database operations, you just need to define a method name it and it generate SQL
- */
+public interface OrderRepository extends JpaRepository<Order , Long> {
+    
+// Methods Arbaz's StaffService need me here 
 
-@Repository
-public interface OrderRepository extends JpaRepository<Order,Long>{
+// Active order sorted by pickup time - for staff dashboard
+// "findBy" + "ArchivedFalse" + "OrderBy" + "PickupTime" + "Asc"
 
-    // for StaffServie: count orders by status
-    long countByStatus(OrderStatus  status);
+List<Order> findByArchivedFalseOrderByPickupTimeAsc();
 
-    // For StaffService : to get orders by status (Active orders)
- main
+// filter active order by status to show pending orders 
+// "findBy" + "Status" + "And" + "ArchivedFalse"
 
-    //for AutoCancellationTaskt
-    List<Order> findByStatusAndPickupTimeBefore(OrderStatus status, LocalDateTime cutoff);
+List<Order>findByStatusAndArchivedFalse();
 
+// Archived Orders sorted by most recently updated - for order history
+// "findBy" + "ArchivedTrue" + "OrderBy" + "UpdatedAt" + "Desc"
+
+List<Order> findByArchivedTrueOrderByUpdatedAtDesc();
+
+// Methods you need for OrderService 
+    // save(order)=already provided free by JpaRepository — INSERT or UPDATE
+    // findById(id)=already provided free by JpaRepository — find by primary key
 }
+
+    
+
