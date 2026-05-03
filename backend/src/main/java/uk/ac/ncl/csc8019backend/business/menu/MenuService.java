@@ -34,7 +34,7 @@ author: parthbhilare
 */
 
 public MenuItem getMenuItemById(Long id) {
-        return menuItemRepository.findById(id)
+        return (MenuItem) menuItemRepository.findById(id)
         .orElseThrow(() -> new ItemNotFoundException("Menu item not found with id: " + id));
     
 }
