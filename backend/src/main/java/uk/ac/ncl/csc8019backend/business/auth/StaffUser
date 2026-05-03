@@ -1,0 +1,9 @@
+package com.coffeeshop.coffeekiosk.entity;
+
+import jakarta.persistence.DiscriminatorValue;
+import jakarta.persistence.Entity;
+
+@Entity
+@DiscriminatorValue("STAFF")
+public class StaffUser extends User {
+}
