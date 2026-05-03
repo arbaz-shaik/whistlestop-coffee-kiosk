@@ -1,0 +1,15 @@
+package com.coffeeshop.coffeekiosk.dto.response;
+
+import com.coffeeshop.coffeekiosk.enums.UserRole;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class LoginResponse {
+    private Long userId;
+    private String fullName;
+    private String email;
+    private UserRole role;
+    private String message;
+}
