@@ -1,0 +1,35 @@
+package com.coffeeshop.coffeekiosk.controller;
+
+import com.coffeeshop.coffeekiosk.dto.request.UpdateOrderStatusRequest;
+import com.coffeeshop.coffeekiosk.entity.CustomerOrder;
+import com.coffeeshop.coffeekiosk.service.StaffOrderService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/staff/orders")
+public class StaffOrderController {
+
+    private final StaffOrderService staffOrderService;
+
+    public StaffOrderController(StaffOrderService staffOrderService) {
+        this.staffOrderService = staffOrderService;
+    }
+
+    @GetMapping
+    public List<CustomerOrder> getAllActiveOrders() {
+        return staffOrderService.getAllActiveOrders();
+    }
+
+    @PatchMapping("/{id}/status")
+    public CustomerOrder updateOrderStatus(@PathVariable Long id,
+                                           @RequestBody UpdateOrderStatusRequest request) {
+        return staffOrderService.updateOrderStatus(id, request.getStatus());
+    }
+
+    @GetMapping("/archived")
+    public List<CustomerOrder> getArchivedOrders() {
+        return staffOrderService.getArchivedOrders();
+    }
+}
