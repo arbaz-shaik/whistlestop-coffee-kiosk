@@ -1,0 +1,7 @@
+package com.coffeeshop.coffeekiosk.repository;
+
+import com.coffeeshop.coffeekiosk.entity.StaffUser;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface StaffUserRepository extends JpaRepository<StaffUser, Long> {
+}
