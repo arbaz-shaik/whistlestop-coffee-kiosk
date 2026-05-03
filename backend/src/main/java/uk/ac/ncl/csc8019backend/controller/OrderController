@@ -1,0 +1,34 @@
+package com.coffeeshop.coffeekiosk.controller;
+
+import com.coffeeshop.coffeekiosk.dto.request.CreateOrderRequest;
+import com.coffeeshop.coffeekiosk.entity.CustomerOrder;
+import com.coffeeshop.coffeekiosk.service.OrderService;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/orders")
+public class OrderController {
+
+    private final OrderService orderService;
+
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
+    @PostMapping
+    public CustomerOrder createOrder(@RequestBody CreateOrderRequest request) {
+        return orderService.createOrder(request);
+    }
+
+    @GetMapping("/customer/{customerId}")
+    public List<CustomerOrder> getOrdersByCustomerId(@PathVariable Long customerId) {
+        return orderService.getOrdersByCustomerId(customerId);
+    }
+
+    @GetMapping("/{orderId}")
+    public CustomerOrder getOrderById(@PathVariable Long orderId) {
+        return orderService.getOrderById(orderId);
+    }
+}
