@@ -60,7 +60,7 @@ public class OrderService {
             }
 
             // Look up the menu item - throws ItemNotFoundException if not found.
-            MenuItem menuItem = menuService.getMenuItemById(itemRequest.getMenuItemId());
+            MenuItem menuItem = (MenuItem) menuService.getMenuItemById(itemRequest.getMenuItemId());
             if (!menuItem.getAvailable()) {
                 throw new ItemUnavailableException(menuItem.getName() + " is currently unavailable");
             }
