@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 
 import uk.ac.ncl.csc8019backend.business.common.ItemNotFoundException;
 
-public class MenuItemTest {
+public class MenuServiceTest {
 
     @Mock
     private MenuItemRepository menuItemRepository;
