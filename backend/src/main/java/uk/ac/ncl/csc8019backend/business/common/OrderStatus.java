@@ -35,10 +35,5 @@ public enum OrderStatus {
     /**
      * Order has been cancelled (no-show or out of stock). Terminal state.
      */
-<<<<<<< HEAD
     CANCELLED
 }
-=======
-
-
->>>>>>> 945bf729ae9cb22329b826f47f624de56e822179
