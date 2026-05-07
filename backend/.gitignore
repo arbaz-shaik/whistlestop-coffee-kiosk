@@ -31,3 +31,26 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Node / Frontend ###
+node_modules/
+dist/
+.cache/
+*.local
+
+### OS / Editor lock files ###
+.LCK*
+*.LCK
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+### Logs ###
+*.log
+npm-debug.log*
+
+### Environment files (never commit secrets) ###
+.env
+.env.local
+.env.*.local
